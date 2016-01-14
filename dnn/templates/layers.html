@@ -1,0 +1,16 @@
+<a href="{% url 'dnn:index' %}">Home</a><br>
+<a href="{% url 'dnn:actions' network.id %}">Actions</a><br><br>
+<h1>{{ network.name }}</h1>
+<ul>
+{% for layer in network.layer_set.all %}
+    <li><a href="{% url 'dnn:layer_edit' layer.id %}">{{ layer.level }} - {{ layer.base_type }}</a></li>
+{% endfor %}
+</ul>
+<br>
+<h2>Add layer :</h2>
+<form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <input type="submit" value="Submit" />
+</form>
+<br>

@@ -1,0 +1,8 @@
+<a href="{% url 'dnn:index' %}">Home</a><br>
+<a href="{% url 'dnn:layers' network.id %}">Layers</a><br><br>
+<h1>{{ network.name }}</h1>
+<form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <input type="submit" value="Submit" />
+</form>

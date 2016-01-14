@@ -1,0 +1,18 @@
+<a href="{% url 'dnn:index' %}">Home</a><br><br>
+<h1>Data Sets :</h1>
+{% if obj_list %}
+    <ul>
+    {% for obj in obj_list %}
+        <li><a href="{% url 'dnn:dataset_edit' obj.id %}">{{ obj.name }}</a></li>
+    {% endfor %}
+    </ul>
+{% else %}
+    <p>No datasets are available.</p>
+{% endif %}
+<br>
+<h2>Add Dataset :</h2>
+<form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <input type="submit" value="Submit" />
+</form>

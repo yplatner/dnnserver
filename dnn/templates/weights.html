@@ -1,0 +1,18 @@
+<a href="{% url 'dnn:index' %}">Home</a><br><br>
+<h1>Weight Intializers :</h1>
+{% if obj_list %}
+    <ul>
+    {% for obj in obj_list %}
+        <li><a href="{% url 'dnn:weight_edit' obj.id %}">{{ obj.name }}</a></li>
+    {% endfor %}
+    </ul>
+{% else %}
+    <p>No weight initializers are available.</p>
+{% endif %}
+<br>
+<h2>Add Weight :</h2>
+<form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <input type="submit" value="Submit" />
+</form>

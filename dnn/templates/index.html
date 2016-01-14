@@ -1,0 +1,22 @@
+<a href="{% url 'dnn:index' %}">Home</a><br>
+<a href="{% url 'dnn:updates' %}">Update strategies</a><br>
+<a href="{% url 'dnn:weights' %}">Weight initializers</a><br>
+<a href="{% url 'dnn:datasets' %}">Data sets</a><br>
+<br>
+<h1>Networks :</h1>
+{% if obj_list %}
+    <ul>
+    {% for network in obj_list %}
+        <li><a href="{% url 'dnn:layers' network.id %}">{{ network.name }}</a> (<a href="{% url 'dnn:network_edit' network.id %}">edit</a>)</li>
+    {% endfor %}
+    </ul>
+{% else %}
+    <p>No networks are available.</p>
+{% endif %}
+<br>
+<h2>Add Network :</h2>
+<form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <input type="submit" value="Submit" />
+</form>
