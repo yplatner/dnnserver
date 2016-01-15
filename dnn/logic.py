@@ -105,15 +105,14 @@ def build(network, input_var=None):
             result = lasagne.layers.InputLayer(shape=(None, layer.shape_channels, layer.shape_x, layer.shape_y), input_var=input_var)
         elif layer.base_type == 'DenseLayer':    
             result = lasagne.layers.DenseLayer(result, num_units=layer.num_units, W=eval(gen_init(layer.w)), b=eval(gen_init(layer.b)), nonlinearity=eval('lasagne.nonlinearities.' + layer.nonlinearity))
-            #result = lasagne.layers.DenseLayer(result, num_units=layer.num_units, nonlinearity=eval('lasagne.nonlinearities.' + layer.nonlinearity))
         elif layer.base_type == 'Conv2DLayer':    
             result = lasagne.layers.Conv2DLayer(result, num_filters=layer.num_filters, filter_size=(layer.filter_size_x, layer.filter_size_y), stride=(layer.stride_x, layer.stride_y), pad=(layer.pad_x, layer.pad_y), untie_biases=layer.untie_biases, W=eval(gen_init(layer.w)), b=eval(gen_init(layer.b)), nonlinearity=eval('lasagne.nonlinearities.' + layer.nonlinearity), convolution=theano.tensor.nnet.conv2d)
-            #result = lasagne.layers.Conv2DLayer(result, num_filters=layer.num_filters, filter_size=(layer.filter_size_x, layer.filter_size_y), nonlinearity=eval('lasagne.nonlinearities.' + layer.nonlinearity))
         elif layer.base_type == 'MaxPool2DLayer':    
             result = lasagne.layers.MaxPool2DLayer(result, pool_size=(layer.pool_size_x, layer.pool_size_y), stride=(layer.stride_x, layer.stride_y), pad=(layer.pad_x, layer.pad_y), ignore_border=layer.ignore_border)
-            #result = lasagne.layers.MaxPool2DLayer(result, pool_size=(layer.pool_size_x, layer.pool_size_y))
         elif layer.base_type == 'DropoutLayer':    
             result = lasagne.layers.DropoutLayer(result, p=layer.p)
+        elif layer.base_type == 'LocalResponseNormalization2DLayer':
+            result = lasagne.layers.LocalResponseNormalization2DLayer(result, alpha=layer.alpha, k=layer.k, beta=layer.beta, n=layer.n)
     if network.generated:
         print("\tloading weights from file")
         with np.load('network' + str(network.id) + '.npz') as f:
@@ -167,6 +166,9 @@ def train(network_id, result_id, inputs_dataset_id, targets_dataset_id, batch_si
     prediction = lasagne.layers.get_output(generated_network)
     loss = eval(gen_loss(network))
     loss = loss.mean()
+    if (network.regularization):
+        penalty = (regularize_layer_params(generated_network, eval('lasagne.regularization.' + network.regularization_penalty)) * network.regularization_coefficient);
+        loss = loss + penalty;
     params = lasagne.layers.get_all_params(generated_network, trainable=True)
     updates = eval(gen_update(network))
     train_fn = theano.function([input_var, target_var], loss, updates=updates)
@@ -211,6 +213,9 @@ def validate(network_id, result_id, inputs_dataset_id, targets_dataset_id, batch
     prediction = lasagne.layers.get_output(generated_network, deterministic=True)
     loss = eval(gen_loss(network))
     loss = loss.mean()
+    if (network.regularization):
+        penalty = (regularize_layer_params(generated_network, eval('lasagne.regularization.' + network.regularization_penalty)) * network.regularization_coefficient);
+        loss = loss + penalty;
     acc = T.mean(T.eq(T.argmax(prediction, axis=1), target_var), dtype=theano.config.floatX)
     val_fn = theano.function([input_var, target_var], [loss, acc])
     print("\tvalidation function was created")

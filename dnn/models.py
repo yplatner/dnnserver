@@ -30,11 +30,18 @@ class Network(models.Model):
         ('binary_hinge_loss',           'Binary Hinge Loss'),
         ('multiclass_hinge_loss',       'Multiclass Hinge Loss'),
     )
+    PENALTIES = (
+        ('l1',                          'Binary Crossentropy'),
+        ('l2',                          'Categorical Crossentropy'),
+    )
     name                = models.CharField(max_length=200, default='')
     user                = models.ForeignKey(User, blank=True, null=True, on_delete=models.SET_NULL)
     update              = models.ForeignKey(Update, blank=True, null=True, on_delete=models.SET_NULL)
     loss_objective      = models.CharField(max_length=50, choices=LOSS_OBJECTIVES, default="binary_crossentropy")
     loss_delta          = models.FloatField(default=1)
+    regularization      = models.BooleanField(default=False)
+    penalty             = models.CharField(max_length=50, choices=PENALTIES, default="l1")
+    coefficient         = models.FloatField(default=1)
     generated           = models.BooleanField(default=False)
     creation_date       = models.DateTimeField(null=True)
     def __str__(self):
@@ -69,42 +76,44 @@ class Weight(models.Model):
     
 class Layer(models.Model):
     LAYER_TYPES = (
-    	('InputLayer',            	    'A network input layer'),
-    	('DenseLayer',            	    'A fully connected layer.'),
-    	#('NINLayer',                   'Network-in-network layer.'),
-    	#('Conv1DLayer',                '1D convolutional layer'),
-    	('Conv2DLayer',            	    '2D convolutional layer'),
-    	#('MaxPool1DLayer',        	    '1D max-pooling layer'),
-    	('MaxPool2DLayer',        	    '2D max-pooling layer'),
-    	#('Pool1DLayer',                '1D pooling layer'),
-    	#('Pool2DLayer',                '2D pooling layer'),
-    	#('Upscale1DLayer',        	    '1D upscaling layer'),
-    	#('Upscale2DLayer',        	    '2D upscaling layer'),
-    	#('GlobalPoolLayer',            'Global pooling layer'),
-    	#('FeaturePoolLayer',           'Feature pooling layer'),
-    	#('FeatureWTALayer',            'Winner Take All layer'),
-    	##('CustomRecurrentLayer',      'A layer which implements a recurrent connection.'),
-    	#('RecurrentLayer',        	    'Dense recurrent neural network (RNN) layer'),
-    	#('LSTMLayer',                  'A long short-term memory (LSTM) layer.'),
-    	#('GRULayer',                   'Gated Recurrent Unit (GRU) Layer'),
-    	##('Gate',                      'Simple class to hold the parameters for a gate connection.'),
-    	('DropoutLayer',                'Dropout layer'),
-    	#('GaussianNoiseLayer',    	    'Gaussian noise layer.'),
-    	#('ReshapeLayer',               'A layer reshaping its input tensor to another tensor of the same total number of elements.'),
-    	#('FlattenLayer',               'A layer that flattens its input.'),
-    	#('DimshuffleLayer',            'Dimshuffle - A layer that rearranges the dimension of its input tensor, maintaining the same same total number of elements.'),
-    	#('PadLayer',                   'Pad all dimensions except the first batch_ndim with width zeros on both sides, or with another value specified in val.'),
-    	#('SliceLayer',            	    'Slices the input at a specific axis and at specific indices.'),
-    	#('ConcatLayer',                'Concatenates multiple inputs along the specified axis.'),
-    	#('ElemwiseMergeLayer',    	    'This layer performs an elementwise merge of its input layers.'),
-    	#('ElemwiseSumLayer',           'This layer performs an elementwise sum of its input layers.'),
-    	#('EmbeddingLayer',        	    'A layer for word embeddings.'),
-    	#('NonlinearityLayer',          'A layer that just applies a nonlinearity.'),
-    	#('BiasLayer',                  'A layer that just adds a (trainable) bias term.'),
-    	##('ExpressionLayer',           'This layer provides boilerplate for a custom layer that applies a simple transformation to the input.'),
-    	#('InverseLayer',               'The InverseLayer performs inverse operations for a single layer of a neural network by applying the partial derivative of the layer to be inverted with respect to its input: transposed layer for a DenseLayer, deconvolutional layer for Conv2DLayer, Conv1DLayer; or an unpooling layer for MaxPool2DLayer.'),
-    	#('TransformerLayer',           'Spatial transformer layer'),
-    	#('ParametricRectifierLayer',   'A layer that applies parametric rectify nonlinearity to its input'),
+    	('InputLayer',            	            'A network input layer'),
+    	('DenseLayer',            	            'A fully connected layer.'),
+    	#('NINLayer',                           'Network-in-network layer.'),
+    	#('Conv1DLayer',                        '1D convolutional layer'),
+    	('Conv2DLayer',            	            '2D convolutional layer'),
+    	#('MaxPool1DLayer',        	            '1D max-pooling layer'),
+    	('MaxPool2DLayer',        	            '2D max-pooling layer'),
+    	#('Pool1DLayer',                        '1D pooling layer'),
+    	#('Pool2DLayer',                        '2D pooling layer'),
+    	#('Upscale1DLayer',        	            '1D upscaling layer'),
+    	#('Upscale2DLayer',        	            '2D upscaling layer'),
+    	#('GlobalPoolLayer',                    'Global pooling layer'),
+    	#('FeaturePoolLayer',                   'Feature pooling layer'),
+    	#('FeatureWTALayer',                    'Winner Take All layer'),
+    	##('CustomRecurrentLayer',              'A layer which implements a recurrent connection.'),
+    	#('RecurrentLayer',        	            'Dense recurrent neural network (RNN) layer'),
+    	#('LSTMLayer',                          'A long short-term memory (LSTM) layer.'),
+    	#('GRULayer',                           'Gated Recurrent Unit (GRU) Layer'),
+    	##('Gate',                              'Simple class to hold the parameters for a gate connection.'),
+    	('DropoutLayer',                        'Dropout layer'),
+    	#('GaussianNoiseLayer',    	            'Gaussian noise layer.'),
+    	#('ReshapeLayer',                       'A layer reshaping its input tensor to another tensor of the same total number of elements.'),
+    	#('FlattenLayer',                       'A layer that flattens its input.'),
+    	#('DimshuffleLayer',                    'Dimshuffle - A layer that rearranges the dimension of its input tensor, maintaining the same same total number of elements.'),
+    	#('PadLayer',                           'Pad all dimensions except the first batch_ndim with width zeros on both sides, or with another value specified in val.'),
+    	#('SliceLayer',            	            'Slices the input at a specific axis and at specific indices.'),
+    	#('ConcatLayer',                        'Concatenates multiple inputs along the specified axis.'),
+    	#('ElemwiseMergeLayer',    	            'This layer performs an elementwise merge of its input layers.'),
+    	#('ElemwiseSumLayer',                   'This layer performs an elementwise sum of its input layers.'),
+    	('LocalResponseNormalization2DLayer',   'Cross-channel Local Response Normalization for 2D feature maps.'),
+        #('BatchNormLayer',	                    'Batch Normalization'),
+    	#('EmbeddingLayer',        	            'A layer for word embeddings.'),
+    	#('NonlinearityLayer',                  'A layer that just applies a nonlinearity.'),
+    	#('BiasLayer',                          'A layer that just adds a (trainable) bias term.'),
+    	##('ExpressionLayer',                   'This layer provides boilerplate for a custom layer that applies a simple transformation to the input.'),
+    	#('InverseLayer',                       'The InverseLayer performs inverse operations for a single layer of a neural network by applying the partial derivative of the layer to be inverted with respect to its input: transposed layer for a DenseLayer, deconvolutional layer for Conv2DLayer, Conv1DLayer; or an unpooling layer for MaxPool2DLayer.'),
+    	#('TransformerLayer',                   'Spatial transformer layer'),
+    	#('ParametricRectifierLayer',           'A layer that applies parametric rectify nonlinearity to its input'),
     )
     NONLINEARITIES = (
         ('sigmoid',                     'Sigmoid activation function'),
@@ -144,6 +153,10 @@ class Layer(models.Model):
     pool_size_x         = models.IntegerField(default=0)
     pool_size_y         = models.IntegerField(default=0)
     ignore_border       = models.BooleanField(default=False)
+    k                   = models.FloatField(default=2)
+    alpha               = models.FloatField(default=0.0001)
+    beta                = models.FloatField(default=0.75)
+    n                   = models.IntegerField(default=5)
     def __str__(self):
         return self.base_type + ' (' + str(self.level) + ')'
     
