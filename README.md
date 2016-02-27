@@ -4,6 +4,7 @@
 You can use any web server which includes a linux distribution. 
 
 Python version 2.7 comes preinstalled on many Linux OS distributions, if it is not installed, it can be downloaded from https://www.python.org/downloads/
+
 Pip comes preinstalled on many Linux OS distributions, if it is not installed, it can be downloaded from https://pip.pypa.io/en/stable/installing/
 
 GIT comes preinstalled on many Linux OS distributions, if it is not installed, it can be downloaded using apt-get (example for Ubuntu) using:
