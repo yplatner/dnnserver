@@ -5,10 +5,10 @@ from django.http import HttpResponse, Http404, HttpResponseRedirect
 from django.core.exceptions import PermissionDenied
 from models import Network, Dataset, Result      # .models ?
 from forms import *
-from logic import load, train, validate, predict, str_to_obj
+from logic import load, train, validate, predict, str_to_obj, reset
 
 def index(request):
-    obj_list = Network.objects.order_by('-creation_date')[:10]
+    obj_list = Network.objects.order_by('-creation_date')
     if request.method == 'POST':
         form = NetworkForm(request.POST)
         if form.is_valid():
@@ -18,8 +18,13 @@ def index(request):
         form = NetworkForm()
     return render(request, 'index.html', {'obj_list': obj_list, 'form': form})
     
+def network_reset(request, network_id):
+    network = Network.objects.get(id=network_id)
+    reset(network)
+    return HttpResponseRedirect('/dnn')      
+    
 def network_edit(request, network_id):
-    obj_list = Network.objects.order_by('-creation_date')[:10]
+    obj_list = Network.objects.order_by('-creation_date')
     network = Network.objects.get(id=network_id)
     if request.method == 'POST':
         form = NetworkForm(request.POST, instance=network)
@@ -31,7 +36,7 @@ def network_edit(request, network_id):
     return render(request, 'index.html', {'obj_list': obj_list, 'form': form})   
     
 def updates(request):
-    obj_list = Update.objects.order_by('-name')[:10]
+    obj_list = Update.objects.order_by('-name')
     if request.method == 'POST':
         form = UpdateForm(request.POST)
         if form.is_valid():
@@ -42,7 +47,7 @@ def updates(request):
     return render(request, 'updates.html', {'obj_list': obj_list, 'form': form})
     
 def update_edit(request, update_id):
-    obj_list = Update.objects.order_by('-name')[:10]
+    obj_list = Update.objects.order_by('-name')
     update = Update.objects.get(id=update_id)
     if request.method == 'POST':
         form = UpdateForm(request.POST, instance=update)
@@ -54,7 +59,7 @@ def update_edit(request, update_id):
     return render(request, 'updates.html', {'obj_list': obj_list, 'form': form})    
     
 def weights(request):
-    obj_list = Weight.objects.order_by('-name')[:10]
+    obj_list = Weight.objects.order_by('-name')
     if request.method == 'POST':
         form = WeightForm(request.POST)
         if form.is_valid():
@@ -65,7 +70,7 @@ def weights(request):
     return render(request, 'weights.html', {'obj_list': obj_list, 'form': form})
     
 def weight_edit(request, weight_id):
-    obj_list = Weight.objects.order_by('-name')[:10]
+    obj_list = Weight.objects.order_by('-name')
     weight = Weight.objects.get(id=weight_id)
     if request.method == 'POST':
         form = UpdateForm(request.POST, instance=weight)
@@ -77,7 +82,7 @@ def weight_edit(request, weight_id):
     return render(request, 'weights.html', {'obj_list': obj_list, 'form': form})       
     
 def datasets(request):
-    obj_list = Dataset.objects.order_by('-name')[:10]
+    obj_list = Dataset.objects.order_by('-name')
     if request.method == 'POST':
         form = DatasetForm(request.POST)
         if form.is_valid():
@@ -88,7 +93,7 @@ def datasets(request):
     return render(request, 'datasets.html', {'obj_list': obj_list, 'form': form})    
     
 def dataset_edit(request, dataset_id):
-    obj_list = Dataset.objects.order_by('-name')[:10]
+    obj_list = Dataset.objects.order_by('-name')
     dataset = Dataset.objects.get(id=dataset_id)
     if request.method == 'POST':
         form = DatasetForm(request.POST, instance=dataset)
@@ -101,6 +106,7 @@ def dataset_edit(request, dataset_id):
     
 def layers(request, network_id):
     network = get_object_or_404(Network, pk=network_id)
+    layers = network.layer_set.order_by('-level').reverse().all
     if request.method == 'POST':
         form = LayerForm(request.POST)
         if form.is_valid():
@@ -108,11 +114,12 @@ def layers(request, network_id):
             return HttpResponseRedirect('/dnn/' + str(network.id))
     else:
         form = LayerForm()
-    return render(request, 'layers.html', {'network': network, 'form': form})   
+    return render(request, 'layers.html', {'network': network, 'layers': layers, 'form': form})   
     
 def layer_edit(request, layer_id):
     layer = Layer.objects.get(id=layer_id)
     network = layer.network
+    layers = network.layer_set.order_by('-level').reverse().all
     if request.method == 'POST':
         form = LayerForm(request.POST, instance=layer)
         if form.is_valid():
@@ -120,7 +127,7 @@ def layer_edit(request, layer_id):
             return HttpResponseRedirect('/dnn/' + str(network.id))
     else:
         form = LayerForm(instance=layer)
-    return render(request, 'layers.html', {'network': network, 'form': form})          
+    return render(request, 'layers.html', {'network': network, 'layers': layers, 'form': form})          
     
 def actions(request, network_id):
     network = get_object_or_404(Network, pk=network_id)
@@ -130,27 +137,27 @@ def actions(request, network_id):
             if form.cleaned_data['action'] == "predict":
                 url_str = '/dnn/' + form.cleaned_data['action'] + '/' + str(network_id) + '/' + str(form.cleaned_data['inputs'].id)
             else:
-                url_str = '/dnn/' + form.cleaned_data['action'] + '/' + str(network_id) + '/' + str(form.cleaned_data['inputs'].id) + '/' + str(form.cleaned_data['targets'].id) + '/' + str(form.cleaned_data['batch_size'])
+                url_str = '/dnn/' + form.cleaned_data['action'] + '/' + str(network_id) + '/' + str(form.cleaned_data['inputs'].id) + '/' + str(form.cleaned_data['targets'].id) + '/' + str(form.cleaned_data['batch_size']) + '/' + str(form.cleaned_data['epochs'])
             return HttpResponseRedirect(url_str)
     else:
         form = ActionForm()
     return render(request, 'actions.html', {'network': network, 'form': form})    
         
-def do_train(request, network_id, inputs_dataset_id, targets_dataset_id, batch_size):
+def do_train(request, network_id, inputs_dataset_id, targets_dataset_id, batch_size, epochs):
     network = Network.objects.get(pk=network_id)
     if request.user == network.user :
         result = Result()
         result.action = 'training'
         result.updated_at = timezone.now()
         result.save()
-        t = threading.Thread(target=train, args=(network_id, result.id, inputs_dataset_id, targets_dataset_id, int(batch_size)))
+        t = threading.Thread(target=train, args=(network_id, result.id, inputs_dataset_id, targets_dataset_id, int(batch_size), int(epochs)))
         t.setDaemon(True)
         t.start()
         return redirect('/dnn/result/' + str(result.id))
     else :
         raise PermissionDenied
         
-def do_validate(request, network_id, inputs_dataset_id, targets_dataset_id, batch_size):
+def do_validate(request, network_id, inputs_dataset_id, targets_dataset_id, batch_size, epochs):
     network = Network.objects.get(pk=network_id)
     if request.user == network.user :
         result = Result()

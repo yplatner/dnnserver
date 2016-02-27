@@ -2,7 +2,7 @@
 <a href="{% url 'dnn:actions' network.id %}">Actions</a><br><br>
 <h1>{{ network.name }}</h1>
 <ul>
-{% for layer in network.layer_set.all %}
+{% for layer in layers %}
     <li><a href="{% url 'dnn:layer_edit' layer.id %}">{{ layer.level }} - {{ layer.base_type }}</a></li>
 {% endfor %}
 </ul>
@@ -14,3 +14,187 @@
     <input type="submit" value="Submit" />
 </form>
 <br>
+
+<script>
+    function update(el) {
+        id_w.style.visibility = "hidden";
+        label_w.style.visibility = "hidden";
+        id_b.style.visibility = "hidden";
+        label_b.style.visibility = "hidden";
+        id_shape_channels.style.visibility = "hidden";
+        label_shape_channels.style.visibility = "hidden";
+        id_shape_x.style.visibility = "hidden";
+        label_shape_x.style.visibility = "hidden";
+        id_shape_y.style.visibility = "hidden";
+        label_shape_y.style.visibility = "hidden";
+        id_p.style.visibility = "hidden";
+        label_p.style.visibility = "hidden";
+        id_rescale.style.visibility = "hidden";
+        label_rescale.style.visibility = "hidden";
+        id_num_units.style.visibility = "hidden";
+        label_num_units.style.visibility = "hidden";
+        id_nonlinearity.style.visibility = "hidden";
+        label_nonlinearity.style.visibility = "hidden";
+        id_num_filters.style.visibility = "hidden";
+        label_num_filters.style.visibility = "hidden";
+        id_filter_size_x.style.visibility = "hidden";
+        label_filter_size_x.style.visibility = "hidden";
+        id_filter_size_y.style.visibility = "hidden";
+        label_filter_size_y.style.visibility = "hidden";
+        id_stride_x.style.visibility = "hidden";
+        label_stride_x.style.visibility = "hidden";
+        id_stride_y.style.visibility = "hidden";
+        label_stride_y.style.visibility = "hidden";
+        id_pad_x.style.visibility = "hidden";
+        label_pad_x.style.visibility = "hidden";
+        id_pad_y.style.visibility = "hidden";
+        label_pad_y.style.visibility = "hidden";
+        id_untie_biases.style.visibility = "hidden";
+        label_untie_biases.style.visibility = "hidden";
+        id_pool_size_x.style.visibility = "hidden";
+        label_pool_size_x.style.visibility = "hidden";
+        id_pool_size_y.style.visibility = "hidden";
+        label_pool_size_y.style.visibility = "hidden";
+        id_ignore_border.style.visibility = "hidden";
+        label_ignore_border.style.visibility = "hidden";
+        id_k.style.visibility = "hidden";
+        label_k.style.visibility = "hidden";
+        id_alpha.style.visibility = "hidden";
+        label_alpha.style.visibility = "hidden";
+        id_beta.style.visibility = "hidden";
+        label_beta.style.visibility = "hidden";
+        id_n.style.visibility = "hidden";
+        label_n.style.visibility = "hidden";
+        if (el.value == "InputLayer") {
+            id_shape_channels.style.visibility = "visible";
+            label_shape_channels.style.visibility = "visible";
+            id_shape_x.style.visibility = "visible";
+            label_shape_x.style.visibility = "visible";
+            id_shape_y.style.visibility = "visible";
+            label_shape_y.style.visibility = "visible";
+        } else if (el.value == "DenseLayer") {
+            id_num_units.style.visibility = "visible";
+            label_num_units.style.visibility = "visible";
+            id_w.style.visibility = "visible";
+            label_w.style.visibility = "visible";
+            id_b.style.visibility = "visible";
+            label_b.style.visibility = "visible";
+            id_nonlinearity.style.visibility = "visible";
+            label_nonlinearity.style.visibility = "visible";
+        } else if (el.value == "Conv2DLayer") {
+            id_num_filters.style.visibility = "visible";
+            label_num_filters.style.visibility = "visible";
+            id_filter_size_x.style.visibility = "visible";
+            label_filter_size_x.style.visibility = "visible";
+            id_filter_size_y.style.visibility = "visible";
+            label_filter_size_y.style.visibility = "visible";
+            id_stride_x.style.visibility = "visible";
+            label_stride_x.style.visibility = "visible";
+            id_stride_y.style.visibility = "visible";
+            label_stride_y.style.visibility = "visible";
+            id_pad_x.style.visibility = "visible";
+            label_pad_x.style.visibility = "visible";
+            id_pad_y.style.visibility = "visible";
+            label_pad_y.style.visibility = "visible";
+            id_untie_biases.style.visibility = "visible";
+            label_untie_biases.style.visibility = "visible";
+            id_w.style.visibility = "visible";
+            label_w.style.visibility = "visible";
+            id_b.style.visibility = "visible";
+            label_b.style.visibility = "visible";
+            id_nonlinearity.style.visibility = "visible";
+            label_nonlinearity.style.visibility = "visible";
+        } else if (el.value == "MaxPool2DLayer") {
+            id_pool_size_x.style.visibility = "visible";
+            label_pool_size_x.style.visibility = "visible";
+            id_pool_size_y.style.visibility = "visible";
+            label_pool_size_y.style.visibility = "visible";
+            id_stride_x.style.visibility = "visible";
+            label_stride_x.style.visibility = "visible";
+            id_stride_y.style.visibility = "visible";
+            label_stride_y.style.visibility = "visible";
+            id_pad_x.style.visibility = "visible";
+            label_pad_x.style.visibility = "visible";
+            id_pad_y.style.visibility = "visible";
+            label_pad_y.style.visibility = "visible";
+            id_ignore_border.style.visibility = "visible";
+            label_ignore_border.style.visibility = "visible";
+        } else if (el.value == "DropoutLayer") {
+            id_p.style.visibility = "visible";
+            label_p.style.visibility = "visible";
+        } else if (el.value == "LocalResponseNormalization2DLayer") {
+            id_k.style.visibility = "visible";
+            label_k.style.visibility = "visible";
+            id_alpha.style.visibility = "visible";
+            label_alpha.style.visibility = "visible";
+            id_beta.style.visibility = "visible";
+            label_beta.style.visibility = "visible";
+            id_n.style.visibility = "visible";
+            label_n.style.visibility = "visible";
+        } else if (el.value == "NonlinearityLayer") {
+            id_nonlinearity.style.visibility = "visible";
+            label_nonlinearity.style.visibility = "visible";
+        }
+    }
+    var labels = document.getElementsByTagName('LABEL');
+    for (var i = 0; i < labels.length; i++) {
+        if (labels[i].htmlFor != '') {
+             var elem = document.getElementById(labels[i].htmlFor);
+             if (elem)
+                elem.label = labels[i];			
+        }
+    }
+    var id_base_type = document.getElementById("id_base_type");
+    var id_w = document.getElementById("id_w");
+    var label_w = document.getElementById('id_w').label;
+    var id_b = document.getElementById("id_b");
+    var label_b = document.getElementById('id_b').label;
+    var id_shape_channels = document.getElementById("id_shape_channels");
+    var label_shape_channels = document.getElementById('id_shape_channels').label;
+    var id_shape_x = document.getElementById("id_shape_x");
+    var label_shape_x = document.getElementById('id_shape_x').label;
+    var id_shape_y = document.getElementById("id_shape_y");
+    var label_shape_y = document.getElementById('id_shape_y').label;
+    var id_p = document.getElementById("id_p");
+    var label_p = document.getElementById('id_p').label;
+    var id_rescale = document.getElementById("id_rescale");
+    var label_rescale = document.getElementById('id_rescale').label;
+    var id_num_units = document.getElementById("id_num_units");
+    var label_num_units = document.getElementById('id_num_units').label;
+    var id_nonlinearity = document.getElementById("id_nonlinearity");
+    var label_nonlinearity = document.getElementById('id_nonlinearity').label;
+    var id_num_filters = document.getElementById("id_num_filters");
+    var label_num_filters = document.getElementById('id_num_filters').label;
+    var id_filter_size_x = document.getElementById("id_filter_size_x");
+    var label_filter_size_x = document.getElementById('id_filter_size_x').label;
+    var id_filter_size_y = document.getElementById("id_filter_size_y");
+    var label_filter_size_y = document.getElementById('id_filter_size_y').label;
+    var id_stride_x = document.getElementById("id_stride_x");
+    var label_stride_x = document.getElementById('id_stride_x').label;
+    var id_stride_y = document.getElementById("id_stride_y");
+    var label_stride_y = document.getElementById('id_stride_y').label;
+    var id_pad_x = document.getElementById("id_pad_x");
+    var label_pad_x = document.getElementById('id_pad_x').label;
+    var id_pad_y = document.getElementById("id_pad_y");
+    var label_pad_y = document.getElementById('id_pad_y').label;
+    var id_untie_biases = document.getElementById("id_untie_biases");
+    var label_untie_biases = document.getElementById('id_untie_biases').label;
+    var id_pool_size_x = document.getElementById("id_pool_size_x");
+    var label_pool_size_x = document.getElementById('id_pool_size_x').label;
+    var id_pool_size_y = document.getElementById("id_pool_size_y");
+    var label_pool_size_y = document.getElementById('id_pool_size_y').label;
+    var id_ignore_border = document.getElementById("id_ignore_border");
+    var label_ignore_border = document.getElementById('id_ignore_border').label;
+    var id_k = document.getElementById("id_k");
+    var label_k = document.getElementById('id_k').label;
+    var id_alpha = document.getElementById("id_alpha");
+    var label_alpha = document.getElementById('id_alpha').label;
+    var id_beta = document.getElementById("id_beta");
+    var label_beta = document.getElementById('id_beta').label;
+    var id_n = document.getElementById("id_n");
+    var label_n = document.getElementById('id_n').label;
+    update(id_base_type);
+    id_base_type.onchange = function() {
+        update(this);
+    }
+</script>

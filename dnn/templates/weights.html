@@ -16,3 +16,111 @@
     {{ form.as_p }}
     <input type="submit" value="Submit" />
 </form>
+
+<script>
+    function update(el) {
+        id_init_val.style.visibility = "hidden";
+        label_init_val.style.visibility = "hidden";
+        id_init_std.style.visibility = "hidden";
+        label_init_std.style.visibility = "hidden";
+        id_init_mean.style.visibility = "hidden";
+        label_init_mean.style.visibility = "hidden";
+        id_init_range.style.visibility = "hidden";
+        label_init_range.style.visibility = "hidden";
+        id_init_range_high.style.visibility = "hidden";
+        label_init_range_high.style.visibility = "hidden";
+        id_init_gain.style.visibility = "hidden";
+        label_init_gain.style.visibility = "hidden";
+        id_init_gain_relu.style.visibility = "hidden";
+        label_init_gain_relu.style.visibility = "hidden";
+        id_init_c01b.style.visibility = "hidden";
+        label_init_c01b.style.visibility = "hidden";
+        id_init_sparsity.style.visibility = "hidden";
+        label_init_sparsity.style.visibility = "hidden";
+        if (el.value == "Constant") {
+            id_init_val.style.visibility = "visible";
+            label_init_val.style.visibility = "visible";
+        } else if (el.value == "Normal") {
+            id_init_std.style.visibility = "visible";
+            label_init_std.style.visibility = "visible";
+            id_init_mean.style.visibility = "visible";
+            label_init_mean.style.visibility = "visible";
+        } else if (el.value == "Uniform") {
+            id_init_std.style.visibility = "visible";
+            label_init_std.style.visibility = "visible";
+            id_init_mean.style.visibility = "visible";
+            label_init_mean.style.visibility = "visible";
+            id_init_range.style.visibility = "visible";
+            label_init_range.style.visibility = "visible";
+            id_init_range_high.style.visibility = "visible";
+            label_init_range_high.style.visibility = "visible";
+        } else if (el.value == "GlorotNormal") {
+            id_init_gain.style.visibility = "visible";
+            label_init_gain.style.visibility = "visible";
+            id_init_gain_relu.style.visibility = "visible";
+            label_init_gain_relu.style.visibility = "visible";
+            //id_init_c01b.style.visibility = "visible";
+            //label_init_c01b.style.visibility = "visible";
+        } else if (el.value == "GlorotUniform") {
+            id_init_gain.style.visibility = "visible";
+            label_init_gain.style.visibility = "visible";
+            id_init_gain_relu.style.visibility = "visible";
+            label_init_gain_relu.style.visibility = "visible";
+            //id_init_c01b.style.visibility = "visible";
+            //label_init_c01b.style.visibility = "visible";
+        } else if (el.value == "HeNormal") {
+            id_init_gain.style.visibility = "visible";
+            label_init_gain.style.visibility = "visible";
+            id_init_gain_relu.style.visibility = "visible";
+            label_init_gain_relu.style.visibility = "visible";
+            //id_init_c01b.style.visibility = "visible";
+            //label_init_c01b.style.visibility = "visible";
+        } else if (el.value == "HeUniform") {
+            id_init_gain.style.visibility = "visible";
+            label_init_gain.style.visibility = "visible";
+            id_init_gain_relu.style.visibility = "visible";
+            label_init_gain_relu.style.visibility = "visible";
+            //id_init_c01b.style.visibility = "visible";
+            //label_init_c01b.style.visibility = "visible";
+        } else if (el.value == "Orthogonal") {
+            id_init_gain.style.visibility = "visible";
+            label_init_gain.style.visibility = "visible";    
+        } else if (el.value == "Sparse") {
+            id_init_std.style.visibility = "visible";
+            label_init_std.style.visibility = "visible";
+            id_init_sparsity.style.visibility = "visible";
+            label_init_sparsity.style.visibility = "visible";
+        }
+    }
+    var labels = document.getElementsByTagName('LABEL');
+    for (var i = 0; i < labels.length; i++) {
+        if (labels[i].htmlFor != '') {
+             var elem = document.getElementById(labels[i].htmlFor);
+             if (elem)
+                elem.label = labels[i];			
+        }
+    }
+    var id_init = document.getElementById("id_init");
+    var id_init_val = document.getElementById("id_init_val");
+    var label_init_val = document.getElementById('id_init_val').label;
+    var id_init_std = document.getElementById("id_init_std");
+    var label_init_std = document.getElementById('id_init_std').label;
+    var id_init_mean = document.getElementById("id_init_mean");
+    var label_init_mean = document.getElementById('id_init_mean').label;
+    var id_init_range = document.getElementById("id_init_range");
+    var label_init_range = document.getElementById('id_init_range').label;
+    var id_init_range_high = document.getElementById("id_init_range_high");
+    var label_init_range_high = document.getElementById('id_init_range_high').label;
+    var id_init_gain = document.getElementById("id_init_gain");
+    var label_init_gain = document.getElementById('id_init_gain').label;
+    var id_init_gain_relu = document.getElementById("id_init_gain_relu");
+    var label_init_gain_relu = document.getElementById('id_init_gain_relu').label;
+    var id_init_c01b = document.getElementById("id_init_c01b");
+    var label_init_c01b = document.getElementById('id_init_c01b').label;
+    var id_init_sparsity = document.getElementById("id_init_sparsity");
+    var label_init_sparsity = document.getElementById('id_init_sparsity').label;
+    update(id_init);
+    id_init.onchange = function() {
+        update(this);
+    }
+</script>

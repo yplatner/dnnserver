@@ -16,3 +16,87 @@
     {{ form.as_p }}
     <input type="submit" value="Submit" />
 </form>
+
+<script>
+    function update(el) {
+        id_learning_rate.style.visibility = "hidden";
+        label_learning_rate.style.visibility = "hidden";
+        id_momentum.style.visibility = "hidden";
+        label_momentum.style.visibility = "hidden";
+        id_rho.style.visibility = "hidden";
+        label_rho.style.visibility = "hidden";
+        id_epsilon.style.visibility = "hidden";
+        label_epsilon.style.visibility = "hidden";
+        id_beta1.style.visibility = "hidden";
+        label_beta1.style.visibility = "hidden";
+        id_beta2.style.visibility = "hidden";
+        label_beta2.style.visibility = "hidden";
+        if (el.value == "sgd") {
+            id_learning_rate.style.visibility = "visible";
+            label_learning_rate.style.visibility = "visible";
+        } else if (el.value == "momentum") {
+            id_learning_rate.style.visibility = "visible";
+            label_learning_rate.style.visibility = "visible";
+            id_momentum.style.visibility = "visible";
+            label_momentum.style.visibility = "visible";
+        } else if (el.value == "nesterov_momentum") {
+            id_learning_rate.style.visibility = "visible";
+            label_learning_rate.style.visibility = "visible";
+            id_momentum.style.visibility = "visible";
+            label_momentum.style.visibility = "visible";
+        } else if (el.value == "adagrad") {
+            id_learning_rate.style.visibility = "visible";
+            label_learning_rate.style.visibility = "visible";
+            id_epsilon.style.visibility = "visible";
+            label_epsilon.style.visibility = "visible";
+        } else if (el.value == "rmsprop") {
+            id_learning_rate.style.visibility = "visible";
+            label_learning_rate.style.visibility = "visible";
+            id_rho.style.visibility = "visible";
+            label_rho.style.visibility = "visible";
+            id_epsilon.style.visibility = "visible";
+            label_epsilon.style.visibility = "visible";
+        } else if (el.value == "adadelta") {
+            id_learning_rate.style.visibility = "visible";
+            label_learning_rate.style.visibility = "visible";
+            id_rho.style.visibility = "visible";
+            label_rho.style.visibility = "visible";
+            id_epsilon.style.visibility = "visible";
+            label_epsilon.style.visibility = "visible";
+        } else if (el.value == "adam") {
+            id_learning_rate.style.visibility = "visible";
+            label_learning_rate.style.visibility = "visible";
+            id_epsilon.style.visibility = "visible";
+            label_epsilon.style.visibility = "visible";
+            id_beta1.style.visibility = "visible";
+            label_beta1.style.visibility = "visible";
+            id_beta2.style.visibility = "visible";
+            label_beta2.style.visibility = "visible";
+        }
+    }
+    var labels = document.getElementsByTagName('LABEL');
+    for (var i = 0; i < labels.length; i++) {
+        if (labels[i].htmlFor != '') {
+             var elem = document.getElementById(labels[i].htmlFor);
+             if (elem)
+                elem.label = labels[i];			
+        }
+    }
+    var id_strategy = document.getElementById("id_strategy");
+    var id_learning_rate = document.getElementById("id_learning_rate");
+    var label_learning_rate = document.getElementById('id_learning_rate').label;
+    var id_momentum = document.getElementById("id_momentum");
+    var label_momentum = document.getElementById('id_momentum').label;
+    var id_rho = document.getElementById("id_rho");
+    var label_rho = document.getElementById('id_rho').label;
+    var id_epsilon = document.getElementById("id_epsilon");
+    var label_epsilon = document.getElementById('id_epsilon').label;
+    var id_beta1 = document.getElementById("id_beta1");
+    var label_beta1 = document.getElementById('id_beta1').label;
+    var id_beta2 = document.getElementById("id_beta2");
+    var label_beta2 = document.getElementById('id_beta2').label;
+    update(id_strategy);
+    id_strategy.onchange = function() {
+        update(this);
+    }
+</script>

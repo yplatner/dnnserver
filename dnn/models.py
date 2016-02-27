@@ -31,8 +31,8 @@ class Network(models.Model):
         ('multiclass_hinge_loss',       'Multiclass Hinge Loss'),
     )
     PENALTIES = (
-        ('l1',                          'Binary Crossentropy'),
-        ('l2',                          'Categorical Crossentropy'),
+        ('l1',                          'L1'),
+        ('l2',                          'L2'),
     )
     name                = models.CharField(max_length=200, default='')
     user                = models.ForeignKey(User, blank=True, null=True, on_delete=models.SET_NULL)
@@ -69,6 +69,7 @@ class Weight(models.Model):
     init_range          = models.FloatField(default=-0.01)
     init_range_high     = models.FloatField(default=0.01)
     init_gain           = models.FloatField(default=1.0)
+    init_gain_relu      = models.BooleanField(default=False)
     init_c01b           = models.BooleanField(default=False)
     init_sparsity       = models.FloatField(default=0.1)
     def __str__(self):
@@ -108,7 +109,7 @@ class Layer(models.Model):
     	('LocalResponseNormalization2DLayer',   'Cross-channel Local Response Normalization for 2D feature maps.'),
         #('BatchNormLayer',	                    'Batch Normalization'),
     	#('EmbeddingLayer',        	            'A layer for word embeddings.'),
-    	#('NonlinearityLayer',                  'A layer that just applies a nonlinearity.'),
+    	('NonlinearityLayer',                  'A layer that just applies a nonlinearity.'),
     	#('BiasLayer',                          'A layer that just adds a (trainable) bias term.'),
     	##('ExpressionLayer',                   'This layer provides boilerplate for a custom layer that applies a simple transformation to the input.'),
     	#('InverseLayer',                       'The InverseLayer performs inverse operations for a single layer of a neural network by applying the partial derivative of the layer to be inverted with respect to its input: transposed layer for a DenseLayer, deconvolutional layer for Conv2DLayer, Conv1DLayer; or an unpooling layer for MaxPool2DLayer.'),
@@ -116,6 +117,7 @@ class Layer(models.Model):
     	#('ParametricRectifierLayer',           'A layer that applies parametric rectify nonlinearity to its input'),
     )
     NONLINEARITIES = (
+        ('None',                        'Linear'),
         ('sigmoid',                     'Sigmoid activation function'),
         ('softmax',                     'Softmax activation function'),
         ('tanh',                        'Tanh activation function'),
@@ -152,7 +154,7 @@ class Layer(models.Model):
     untie_biases        = models.BooleanField(default=False)
     pool_size_x         = models.IntegerField(default=0)
     pool_size_y         = models.IntegerField(default=0)
-    ignore_border       = models.BooleanField(default=False)
+    ignore_border       = models.BooleanField(default=True)
     k                   = models.FloatField(default=2)
     alpha               = models.FloatField(default=0.0001)
     beta                = models.FloatField(default=0.75)
@@ -170,6 +172,7 @@ class Dataset(models.Model):
         ('float32',                     'float DWORD'),
     )
     name                = models.CharField(max_length=200, default='')
+    pickle              = models.BooleanField(default=False)
     image               = models.BooleanField(default=False)
     grayscale           = models.BooleanField(default=False)
     source              = models.CharField(max_length=200, default='')
@@ -177,6 +180,10 @@ class Dataset(models.Model):
     zipped              = models.BooleanField(default=False)
     data_type           = models.CharField(max_length=200, choices=DATA_VAR_TYPES, default="uint8")
     offset              = models.IntegerField(default=0)
+    split               = models.BooleanField(default=False)
+    split_take_first    = models.BooleanField(default=False)
+    split_size_first    = models.IntegerField(default=0)
+    split_size_second   = models.IntegerField(default=0)
     reshape             = models.BooleanField(default=False)
     shape_channels      = models.IntegerField(default=1)
     shape_x             = models.IntegerField(default=1)

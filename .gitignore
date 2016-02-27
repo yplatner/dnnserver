@@ -1,6 +1,10 @@
 .c9/
 backup/
-db.sqlite
+backup*
+db.sqlite3
 network*.npz
 t10k*
 train*
+data_batch_*
+test_batch
+cifar10*

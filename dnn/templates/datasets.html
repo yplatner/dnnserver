@@ -16,3 +16,127 @@
     {{ form.as_p }}
     <input type="submit" value="Submit" />
 </form>
+
+<script>
+    var labels = document.getElementsByTagName('LABEL');
+    for (var i = 0; i < labels.length; i++) {
+        if (labels[i].htmlFor != '') {
+             var elem = document.getElementById(labels[i].htmlFor);
+             if (elem)
+                elem.label = labels[i];			
+        }
+    }
+    
+    var id_split = document.getElementById("id_split");
+    var id_split_take_first = document.getElementById("id_split_take_first");
+    var label_split_take_first = document.getElementById('id_split_take_first').label;
+    var id_split_size_first = document.getElementById("id_split_size_first");
+    var label_split_size_first = document.getElementById('id_split_size_first').label;
+    var id_split_size_second = document.getElementById("id_split_size_second");
+    var label_split_size_second = document.getElementById('id_split_size_second').label;
+    id_split_take_first.style.visibility = "hidden";
+    label_split_take_first.style.visibility = "hidden";
+    id_split_size_first.style.visibility = "hidden";
+    label_split_size_first.style.visibility = "hidden";
+    id_split_size_second.style.visibility = "hidden";
+    label_split_size_second.style.visibility = "hidden";
+    id_split.onchange = function() {
+        if (this.checked) {
+            id_split_take_first.style.visibility = "visible";
+            label_split_take_first.style.visibility = "visible";
+            id_split_size_first.style.visibility = "visible";
+            label_split_size_first.style.visibility = "visible";
+            id_split_size_second.style.visibility = "visible";
+            label_split_size_second.style.visibility = "visible";
+        } else {
+            id_split_take_first.style.visibility = "hidden";
+            label_split_take_first.style.visibility = "hidden";
+            id_split_size_first.style.visibility = "hidden";
+            label_split_size_first.style.visibility = "hidden";
+            id_split_size_second.style.visibility = "hidden";
+            label_split_size_second.style.visibility = "hidden";
+        }
+    }
+    
+    var id_reshape = document.getElementById("id_reshape");
+    var id_shape_channels = document.getElementById("id_shape_channels");
+    var label_shape_channels = document.getElementById('id_shape_channels').label;
+    var id_shape_x = document.getElementById("id_shape_x");
+    var label_shape_x = document.getElementById('id_shape_x').label;
+    var id_shape_y = document.getElementById("id_shape_y");
+    var label_shape_y = document.getElementById('id_shape_y').label;
+    id_shape_channels.style.visibility = "hidden";
+    label_shape_channels.style.visibility = "hidden";
+    id_shape_x.style.visibility = "hidden";
+    label_shape_x.style.visibility = "hidden";
+    id_shape_y.style.visibility = "hidden";
+    label_shape_y.style.visibility = "hidden";
+    id_reshape.onchange = function() {
+        if (this.checked) {
+            id_shape_channels.style.visibility = "visible";
+            label_shape_channels.style.visibility = "visible";
+            id_shape_x.style.visibility = "visible";
+            label_shape_x.style.visibility = "visible";
+            id_shape_y.style.visibility = "visible";
+            label_shape_y.style.visibility = "visible";
+        } else {
+            id_shape_channels.style.visibility = "hidden";
+            label_shape_channels.style.visibility = "hidden";
+            id_shape_x.style.visibility = "hidden";
+            label_shape_x.style.visibility = "hidden";
+            id_shape_y.style.visibility = "hidden";
+            label_shape_y.style.visibility = "hidden";
+        }
+    }
+    
+    var id_divide = document.getElementById("id_divide");
+    var id_divide_type = document.getElementById("id_divide_type");
+    var label_divide_type = document.getElementById('id_divide_type').label;
+    var id_divide_num = document.getElementById("id_divide_num");
+    var label_divide_num = document.getElementById('id_divide_num').label;
+    id_divide_type.style.visibility = "hidden";
+    label_divide_type.style.visibility = "hidden";
+    id_divide_num.style.visibility = "hidden";
+    label_divide_num.style.visibility = "hidden";
+    id_divide.onchange = function() {
+        if (this.checked) {
+            id_divide_type.style.visibility = "visible";
+            label_divide_type.style.visibility = "visible";
+            id_divide_num.style.visibility = "visible";
+            label_divide_num.style.visibility = "visible";
+        } else {
+            id_divide_type.style.visibility = "hidden";
+            label_divide_type.style.visibility = "hidden";
+            id_divide_num.style.visibility = "hidden";
+            label_divide_num.style.visibility = "hidden";
+        }
+    }
+    
+    var id_image = document.getElementById("id_image");
+    var id_grayscale = document.getElementById("id_grayscale");
+    var label_grayscale = document.getElementById('id_grayscale').label;
+    var id_data_type = document.getElementById("id_data_type");
+    var label_data_type = document.getElementById('id_data_type').label;
+    var id_offset = document.getElementById("id_offset");
+    var label_offset = document.getElementById('id_offset').label;
+    id_grayscale.style.visibility = "hidden";
+    label_grayscale.style.visibility = "hidden";
+    id_image.onchange = function() {
+        if (this.checked) {
+            id_grayscale.style.visibility = "visible";
+            label_grayscale.style.visibility = "visible";
+            id_data_type.style.visibility = "hidden";
+            label_data_type.style.visibility = "hidden";
+            id_offset.style.visibility = "hidden";
+            label_offset.style.visibility = "hidden";
+        } else {
+            id_grayscale.style.visibility = "hidden";
+            label_grayscale.style.visibility = "hidden";
+            id_data_type.style.visibility = "visible";
+            label_data_type.style.visibility = "visible";
+            id_offset.style.visibility = "visible";
+            label_offset.style.visibility = "visible";
+        }
+    }
+    
+</script>

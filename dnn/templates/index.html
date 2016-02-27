@@ -8,7 +8,7 @@
 {% if obj_list %}
     <ul>
     {% for network in obj_list %}
-        <li><a href="{% url 'dnn:layers' network.id %}">{{ network.name }}</a> (<a href="{% url 'dnn:network_edit' network.id %}">edit</a>)</li>
+        <li><a href="{% url 'dnn:layers' network.id %}">{{ network.name }}</a> (<a href="{% url 'dnn:network_edit' network.id %}">edit</a> - <a href="{% url 'dnn:network_reset' network.id %}">reset</a>)</li>
     {% endfor %}
     </ul>
 {% else %}
@@ -16,8 +16,61 @@
 {% endif %}
 <br>
 <h2>Add Network :</h2>
-<form method="post">
-    {% csrf_token %}
-    {{ form.as_p }}
-    <input type="submit" value="Submit" />
-</form>
+<div id="app">
+    <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <input type="submit" value="Submit" />
+    </form>
+</div>
+
+<script>
+    var labels = document.getElementsByTagName('LABEL');
+    for (var i = 0; i < labels.length; i++) {
+        if (labels[i].htmlFor != '') {
+             var elem = document.getElementById(labels[i].htmlFor);
+             if (elem)
+                elem.label = labels[i];			
+        }
+    }
+    var id_loss_objective = document.getElementById("id_loss_objective");
+    var id_loss_delta = document.getElementById("id_loss_delta");
+    var label_loss_delta = document.getElementById('id_loss_delta').label;
+    id_loss_delta.style.visibility = "hidden";
+    label_loss_delta.style.visibility = "hidden";
+    //test.addEventListener("click", whatClicked, false);
+    id_loss_objective.onchange = function() {
+        if (this.value == "multiclass_hinge_loss" || this.value == "binary_hinge_loss") {
+            id_loss_delta.style.visibility = "visible";
+            label_loss_delta.style.visibility = "visible";
+            id_loss_delta.value = "1";
+        } else {
+            id_loss_delta.style.visibility = "hidden";
+            label_loss_delta.style.visibility = "hidden";
+        }
+    }
+    
+    var id_regularization = document.getElementById("id_regularization");
+    var id_penalty = document.getElementById("id_penalty");
+    var label_penalty = document.getElementById('id_penalty').label;
+    var id_coefficient = document.getElementById("id_coefficient");
+    var label_coefficient = document.getElementById('id_coefficient').label;
+    id_penalty.style.visibility = "hidden";
+    label_penalty.style.visibility = "hidden";
+    id_coefficient.style.visibility = "hidden";
+    label_coefficient.style.visibility = "hidden";
+    id_regularization.onchange = function() {
+        if (this.checked) {
+            id_penalty.style.visibility = "visible";
+            label_penalty.style.visibility = "visible";
+            id_coefficient.style.visibility = "visible";
+            label_coefficient.style.visibility = "visible";
+        } else {
+            id_penalty.style.visibility = "hidden";
+            label_penalty.style.visibility = "hidden";
+            id_coefficient.style.visibility = "hidden";
+            label_coefficient.style.visibility = "hidden";
+        }
+    }
+    
+</script>

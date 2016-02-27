@@ -1,8 +1,9 @@
+import time
 import sys
 import os
 import time
 import numpy as np
-import scipy as np
+import scipy as sp
 import theano
 import theano.tensor as T
 import lasagne
@@ -26,7 +27,7 @@ def str_to_obj(obj_str):
 
 # Convert an image (color or grayscale) to a numpy array
 def img_to_arr(img, gs):
-    arr = scipy.misc.imread(img, gs)
+    arr = sp.misc.imread(img, gs)
     return arr
     
 # Helper function iterating over training data in mini-batches of a particular size, optionally in random order. 
@@ -45,24 +46,28 @@ def iterate(inputs, targets, batchsize, shuffle=False):
 
 # Create weight initialization command string
 def gen_init(weight):
+    if weight.init_gain_relu == True :
+        gain = "gain='relu'"
+    else :
+        gain = 'gain=' + str(weight.init_gain)
     if weight.init == 'Constant':       
-        parameters = str(weight.init_val)
+        parameters = 'val=' + str(weight.init_val)
     elif weight.init == 'Normal':    
-        parameters = str(weight.init_std) + ',' + str(weight.init_mean)
+        parameters = 'std=' + str(weight.init_std) + ', ' + 'mean=' + str(weight.init_mean)
     elif weight.init == 'Uniform':      
-        parameters = str(weight.init_range) + ',' + str(weight.init_std) + ',' + str(weight.init_mean)
+        parameters = 'range=' + str(weight.init_range) + ', ' + 'std=' + str(weight.init_std) + ', ' + 'mean=' + str(weight.init_mean)
     elif weight.init == 'GlorotNormal':
-        parameters = str(weight.init_gain) + ',' + str( weight.init_c01b)
+        parameters = gain + ', ' + 'c01b=' + str(weight.init_c01b)
     elif weight.init == 'GlorotUniform':  
-        parameters = str(weight.init_gain) + ',' + str(weight.init_c01b)
+        parameters = gain + ', ' + 'c01b=' + str(weight.init_c01b)
     elif weight.init == 'HeNormal':
-        parameters = str(weight.init_gain) + ',' + str(weight.init_c01b)
+        parameters = gain + ', ' + 'c01b=' + str(weight.init_c01b)
     elif weight.init == 'HeUniform':      
-        parameters = str(weight.init_gain) + ',' + str(weight.init_c01b)
+        parameters = gain + ', ' + 'c01b=' + str(weight.init_c01b)
     elif weight.init == 'Orthogonal':
-        parameters = str(weight.init_gain)
+        parameters = gain
     elif weight.init == 'Sparse':     
-        parameters = str(weight.init_sparsity) + ',' + str(weight.init_std)
+        parameters = 'sparsity=' + str(weight.init_sparsity) + ', ' + 'std=' + str(weight.init_std)
     init_str = 'lasagne.init.' + weight.init + '(' + parameters + ')'
     return init_str
     
@@ -103,16 +108,26 @@ def build(network, input_var=None):
         layer = layers.get(level=i)
         if layer.base_type == 'InputLayer':       
             result = lasagne.layers.InputLayer(shape=(None, layer.shape_channels, layer.shape_x, layer.shape_y), input_var=input_var)
-        elif layer.base_type == 'DenseLayer':    
-            result = lasagne.layers.DenseLayer(result, num_units=layer.num_units, W=eval(gen_init(layer.w)), b=eval(gen_init(layer.b)), nonlinearity=eval('lasagne.nonlinearities.' + layer.nonlinearity))
+        elif layer.base_type == 'DenseLayer':
+            if layer.nonlinearity == 'None':
+                result = lasagne.layers.DenseLayer(result, num_units=layer.num_units, W=eval(gen_init(layer.w)), b=eval(gen_init(layer.b)), nonlinearity=None)
+            else:
+                result = lasagne.layers.DenseLayer(result, num_units=layer.num_units, W=eval(gen_init(layer.w)), b=eval(gen_init(layer.b)), nonlinearity=eval('lasagne.nonlinearities.' + layer.nonlinearity))
         elif layer.base_type == 'Conv2DLayer':    
-            result = lasagne.layers.Conv2DLayer(result, num_filters=layer.num_filters, filter_size=(layer.filter_size_x, layer.filter_size_y), stride=(layer.stride_x, layer.stride_y), pad=(layer.pad_x, layer.pad_y), untie_biases=layer.untie_biases, W=eval(gen_init(layer.w)), b=eval(gen_init(layer.b)), nonlinearity=eval('lasagne.nonlinearities.' + layer.nonlinearity), convolution=theano.tensor.nnet.conv2d)
+            if layer.nonlinearity == 'None':
+                result = lasagne.layers.Conv2DLayer(result, num_filters=layer.num_filters, filter_size=(layer.filter_size_x, layer.filter_size_y), stride=(layer.stride_x, layer.stride_y), pad=(layer.pad_x, layer.pad_y), untie_biases=layer.untie_biases, W=eval(gen_init(layer.w)), b=eval(gen_init(layer.b)), nonlinearity=None, convolution=theano.tensor.nnet.conv2d)
+            else:
+                result = lasagne.layers.Conv2DLayer(result, num_filters=layer.num_filters, filter_size=(layer.filter_size_x, layer.filter_size_y), stride=(layer.stride_x, layer.stride_y), pad=(layer.pad_x, layer.pad_y), untie_biases=layer.untie_biases, W=eval(gen_init(layer.w)), b=eval(gen_init(layer.b)), nonlinearity=eval('lasagne.nonlinearities.' + layer.nonlinearity), convolution=theano.tensor.nnet.conv2d)
         elif layer.base_type == 'MaxPool2DLayer':    
             result = lasagne.layers.MaxPool2DLayer(result, pool_size=(layer.pool_size_x, layer.pool_size_y), stride=(layer.stride_x, layer.stride_y), pad=(layer.pad_x, layer.pad_y), ignore_border=layer.ignore_border)
         elif layer.base_type == 'DropoutLayer':    
             result = lasagne.layers.DropoutLayer(result, p=layer.p)
         elif layer.base_type == 'LocalResponseNormalization2DLayer':
+            print("no normalization")
             result = lasagne.layers.LocalResponseNormalization2DLayer(result, alpha=layer.alpha, k=layer.k, beta=layer.beta, n=layer.n)
+        elif layer.base_type == 'NonlinearityLayer':    
+            if layer.nonlinearity != 'None':
+                result = lasagne.layers.NonlinearityLayer(result, nonlinearity=eval('lasagne.nonlinearities.' + layer.nonlinearity))
     if network.generated:
         print("\tloading weights from file")
         with np.load('network' + str(network.id) + '.npz') as f:
@@ -127,37 +142,54 @@ def build(network, input_var=None):
 
 # Loads data from a remote binary file and adapts it
 def load(dataset):
+    #create_cifar10()
     if not os.path.exists(dataset.filename):
         urlretrieve(dataset.source + dataset.filename, dataset.filename)
+        print("retrieved file " + dataset.filename)
+    else:
+        print("opening existing file " + dataset.filename)
     if dataset.zipped:
-        with gzip.open(dataset.filename, 'rb') as f:
-            if (dataset.image):
-                value = img_to_arr(f, dataset.grayscale)
-                value = np.swapaxes(value,0,2)
-                value = np.expand_dims(value, axis=0)
-            else:
-                value = np.frombuffer(f.read(), eval('np.' + dataset.data_type), offset=dataset.offset)
-                if dataset.reshape:
-                    value = eval('value.reshape(-1, ' + str(dataset.shape_channels) + ', ' + str(dataset.shape_x) + ', ' + str(dataset.shape_y) + ')')
+        f = gzip.open(dataset.filename, 'rb')
     else:
         f = open(dataset.filename, 'rb')
-        if (dataset.image):
-            value = img_to_arr(f, dataset.grayscale)
-            value = np.swapaxes(value,0,2)
-            value = np.expand_dims(value, axis=0)
-        else:
-            value = np.frombuffer(f.read(), eval('np.' + dataset.data_type), offset=dataset.offset)
-            if dataset.reshape:
-                value = eval('value.reshape(-1, ' + str(dataset.shape_channels) + ', ' + str(dataset.shape_x) + ', ' + str(dataset.shape_y) + ')')
+    if (dataset.image):
+        value = img_to_arr(f, dataset.grayscale)
+        value = np.swapaxes(value,0,2)
+        value = np.expand_dims(value, axis=0)
+    if dataset.pickle:
+        value = pickle.load(f)
+    else:
+        value = np.frombuffer(f.read(), eval('np.' + dataset.data_type), offset=dataset.offset)
+    if dataset.split:
+        take_first = dataset.split_take_first
+        size_first = dataset.split_size_first
+        size_second = dataset.split_size_second
+        value = np.split(value, size_first + size_second)
+        #print("Array shape before split:")
+        #print(np.shape(value))
+        def split_func(data):
+            if take_first:
+                #return data[0:(size_first-1)] ## FIX THIS
+                return data[0];
+            else:
+                return data[size_first:(size_first+size_second)]
+        value = np.apply_along_axis(split_func, axis=0, arr=value)
+        #print(np.shape(value))
+        value = np.hstack(value)
+        #print(np.shape(value))
+    if dataset.reshape:
+        value = eval('value.reshape(-1, ' + str(dataset.shape_channels) + ', ' + str(dataset.shape_x) + ', ' + str(dataset.shape_y) + ')')
     if dataset.divide:
         value = value / eval('np.' + str(dataset.divide_type) + '(' + str(dataset.divide_num) + ')')
     value = eval('value' + dataset.trim)
+    f.close()
     return value
     
 # train with input(s) and target(s), and return loss value
 # inputs is T.tensor4, targets is T.ivector
-def train(network_id, result_id, inputs_dataset_id, targets_dataset_id, batch_size):
+def train(network_id, result_id, inputs_dataset_id, targets_dataset_id, batch_size, epochs):
     print("starting training...")
+    print(time.ctime())
     network = Network.objects.get(pk=network_id)
     input_var = T.tensor4('inputs')
     target_var = T.ivector('targets')
@@ -166,28 +198,42 @@ def train(network_id, result_id, inputs_dataset_id, targets_dataset_id, batch_si
     prediction = lasagne.layers.get_output(generated_network)
     loss = eval(gen_loss(network))
     loss = loss.mean()
-    if (network.regularization):
-        penalty = (regularize_layer_params(generated_network, eval('lasagne.regularization.' + network.regularization_penalty)) * network.regularization_coefficient);
-        loss = loss + penalty;
+    #if (network.regularization):
+    #    penalty = (lasagne.regularization.regularize_layer_params(generated_network, eval('lasagne.regularization.' + network.penalty)) * network.coefficient);
+    #    loss = loss + penalty;
+    acc = T.mean(T.eq(T.argmax(prediction, axis=1), target_var), dtype=theano.config.floatX)
     params = lasagne.layers.get_all_params(generated_network, trainable=True)
     updates = eval(gen_update(network))
-    train_fn = theano.function([input_var, target_var], loss, updates=updates)
+    train_fn = theano.function([input_var, target_var], [loss, acc], updates=updates)
     print("\ttraining function was created")
     inputs = load(Dataset.objects.get(pk=inputs_dataset_id))
+    print(np.shape(inputs))
+    print(inputs)
+    print("\tloaded inputs")
     targets = load(Dataset.objects.get(pk=targets_dataset_id))
+    print(np.shape(targets))
+    print(targets)
     print("\tdata was loaded")
     train_err = 0
+    train_acc = 0
     train_batches = 0
-    for batch in iterate(inputs, targets, batch_size, shuffle=True):
-        batch_inputs, batch_targets = batch
-        err = train_fn(batch_inputs, batch_targets)
-        print("\tbatch " + str(train_batches) + ': training error is ' + str(err))
-        train_err += err
-        train_batches += 1
+    for num in range(0,epochs):
+        print("### EPOCH " + str(num) + " ###")
+        for batch in iterate(inputs, targets, batch_size, shuffle=True):
+            batch_inputs, batch_targets = batch
+            err, acc = train_fn(batch_inputs, batch_targets)
+            print("\tbatch " + str(train_batches) + ': training error is ' + str(err) + ', accuracy is ' + str(acc))
+            print("\t" + time.ctime())
+            train_err += err
+            train_acc += acc
+            train_batches += 1
     res_err = train_err / train_batches
+    res_acc = (train_acc / train_batches) * 100
     print("\ttraining done - error:\t\t{:.6f}".format(res_err))
+    print(time.ctime())
     result = Result.objects.get(pk=result_id)
     result.error = res_err
+    result.accuracy = res_acc
     result.updated_at = timezone.now()
     result.loaded = True
     result.save()
@@ -213,9 +259,9 @@ def validate(network_id, result_id, inputs_dataset_id, targets_dataset_id, batch
     prediction = lasagne.layers.get_output(generated_network, deterministic=True)
     loss = eval(gen_loss(network))
     loss = loss.mean()
-    if (network.regularization):
-        penalty = (regularize_layer_params(generated_network, eval('lasagne.regularization.' + network.regularization_penalty)) * network.regularization_coefficient);
-        loss = loss + penalty;
+    #if (network.regularization):
+    #    penalty = (regularize_layer_params(generated_network, eval('lasagne.regularization.' + network.regularization_penalty)) * network.regularization_coefficient);
+    #    loss = loss + penalty;
     acc = T.mean(T.eq(T.argmax(prediction, axis=1), target_var), dtype=theano.config.floatX)
     val_fn = theano.function([input_var, target_var], [loss, acc])
     print("\tvalidation function was created")
@@ -275,3 +321,40 @@ def reset(network):
     network.generated = False
     network.save()
     return network
+
+# Create datasets for CIFAR10
+def create_cifar10():
+    # Load training data
+    X, y = [], []
+    for num in range(1,5):
+        f = open('data_batch_' + str(num), 'rb')
+        batch = pickle.load(f)
+        X.append(batch['data'])
+        y.append(batch['labels'])
+    X = np.concatenate(X).reshape(-1, 3, 32, 32).astype(np.float32)
+    y = np.concatenate(y).astype(np.int32)
+    # Load test data
+    f = open('test_batch', 'rb')
+    batch = pickle.load(f)
+    X_test = batch['data'].reshape(-1, 3, 32, 32).astype(np.float32)
+    y_test = np.array(batch['labels'], dtype=np.int32)
+    # Split arrays
+    ii = np.random.permutation(len(X))
+    X_train = X[ii[1000:]]
+    y_train = y[ii[1000:]]
+    X_val = X[ii[:1000]]
+    y_val = y[ii[:1000]]
+    # Offset data
+    offset = np.mean(X_train, 0)
+    scale = np.std(X_train, 0).clip(min=1)
+    X_train = (X_train - offset) / scale
+    X_val = (X_val - offset) / scale
+    X_test = (X_test - offset) / scale
+    # Save data
+    pickle.dump(X_train, open('cifar10_X_train', "wb"))
+    pickle.dump(y_train, open('cifar10_y_train', "wb"))
+    pickle.dump(X_val, open('cifar10_X_val', "wb"))
+    pickle.dump(y_val, open('cifar10_y_val', "wb"))
+    pickle.dump(X_test, open('cifar10_X_test', "wb"))
+    pickle.dump(y_test, open('cifar10_y_test', "wb"))
+    return True

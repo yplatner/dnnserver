@@ -11,12 +11,13 @@ class ActionForm(forms.Form):
     inputs = forms.ModelChoiceField(queryset=Dataset.objects.all())
     targets = forms.ModelChoiceField(queryset=Dataset.objects.all(), required=False)
     batch_size = forms.IntegerField()
+    epochs = forms.IntegerField()
     
 class NetworkForm(forms.ModelForm):
     class Meta:
         model = Network
         #fields = '__all__'
-        fields = ['name', 'user', 'update', 'loss_objective', 'loss_delta']
+        fields = ['name', 'user', 'update', 'loss_objective', 'loss_delta', 'regularization', 'penalty', 'coefficient']
         
 class LayerForm(forms.ModelForm):
     class Meta:
